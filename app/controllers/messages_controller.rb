@@ -5,15 +5,16 @@ class MessagesController < ApplicationController
 	before_filter :setup
 
 	def setup
+		# Used into the JS
 		@paths ||= {
 			:root => url_for(:root),
-			:index => [messages_path, "GET"],
+			:index => [url_for(:action => :index, :page => "__"), "GET"],
 			:new => [new_message_path, "GET"],
 			:create => [messages_path, "POST"],
-			:edit => [edit_message_path("@@"), "GET"],
-			:show => [message_path("@@"), "GET"],
-			:update => [message_path("@@"), "PUT"],
-			:delete => [message_path("@@"), "DELETE"]
+			:edit => [edit_message_path("__"), "GET"],
+			:show => [message_path("__"), "GET"],
+			:update => [message_path("__"), "PUT"],
+			:delete => [message_path("__"), "DELETE"]
 		}
 	end
 
@@ -45,9 +46,9 @@ class MessagesController < ApplicationController
 	def show
 		begin
 			@record = Message.find(params[:id]) if @record.blank?
-			render "_message.html", :layout => (request.xhr? ? false : "application"), :locals => {:record => @record, :details => params[:details].to_boolean}
+			render "_message.html", :layout => (request.xhr? ? false : "application"), :locals => {:record => @record, :details => params[:detailed].to_boolean}
 		rescue Exception => e
-			render :nothing => true, :status => 404
+			render :text => e.to_s, :status => 404
 		end
 	end
 
@@ -57,7 +58,7 @@ class MessagesController < ApplicationController
 			@creating = @record.new_record?
 			render "form.html", :layout => (request.xhr? ? false : "application")
 		rescue Exception => e
-			render :nothing => true, :status => 404
+			render :text => e.to_s, :status => 404
 		end
 	end
 
@@ -65,12 +66,11 @@ class MessagesController < ApplicationController
 		begin
 			@record = Message.find(params[:id]) if @record.blank?
 			@record.attributes = params[:message]
-			params[:details] = true
 			@record.save
 
 			self.show
 		rescue Exception => e
-			render :nothing => true, :status => 500
+			render :text => e.to_s, :status => 500
 		end
 	end
 
@@ -80,7 +80,7 @@ class MessagesController < ApplicationController
 			@record.delete
 			render :nothing => true, :status => 200
 		rescue Exception => e
-			render :nothing => true, :status => 500
+			render :text => e.to_s, :status => 500
 		end
 	end
 end

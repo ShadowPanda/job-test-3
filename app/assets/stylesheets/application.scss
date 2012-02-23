@@ -109,7 +109,7 @@ article{
 	margin-bottom: 0;
 }
 
-.alert-error.ajax-after{
+.ajax-after{
 	margin-top: 18px;
 }
 
@@ -123,10 +123,6 @@ article{
 	a{
 		background-color: #EEEEEE !important;
 
-		&.active{
-			background-color: #DDDDDD  !important;
-		}
-
 		&:hover{
 		   cursor: pointer;
 			background-color: #FCB734 !important;
@@ -135,4 +131,16 @@ article{
 			@include transition-timing-function(ease);
 		}
 	}
+
+	li.active{
+	   a{
+			background-color: #FCB734 !important;
+		}
+	}
+}
+
+.counter{
+	color: white;
+	text-align: center;
+	padding-top: 10px;
 }

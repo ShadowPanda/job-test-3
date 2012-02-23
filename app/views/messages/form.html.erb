@@ -3,6 +3,7 @@
 <hr/>
 
 <%= form_for @record, :html => {:id => "message-form", :class => "editing #{@creating ? "creating" : ""} #{request.xhr? ? "xhr" : ""}"}, :remote => true do |f| %>
+	<input type="hidden" name="detailed" value="<%= params[:detailed] || "false" %>"/>
 	<div class="container-fluid">
 		<div class="row-fluid">
 			<div class="span4">

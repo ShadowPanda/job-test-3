@@ -3,20 +3,34 @@ String.prototype.trim = -> this.replace /(^\s+)|(\s+$)/g, ''
 $.cowtech =
 	messages:
 		data: {}
+		creating: true
 
 		loading_message: ->
 			message = $('<article class="editing xhr"></article>')
 			loader = $('<%= image_tag "loader.gif", {:alt => "Loading ...", :class => "loader"} %>').appendTo(message)
 			message
 
-		change_page: ->
+		change_page: (ev, page) ->
 			lm = $.cowtech.messages.loading_message()
-			link = $(this).attr('href')
+			link = ''
 
+			# Get the new page
+			if !page?
+				page = $(this).closest('li').attr('data-page')
+			else if page == 0
+				page = $('div.pagination li.active').attr('data-page')
+			page = 1 if !page?
+
+			# Compute the new link and save it into the history
+			link = $.cowtech.messages.data.paths['index'][0].replace('__', page)
+			history.pushState(page, null, link)
+
+			# Prepare the GUI for loading
 			messages = $('#messages').hide()
 			messages.parent().find('> div.alert-error.ajax-after').remove()
 			messages.before(lm)
 
+			# Fetch page
 			$.ajax({
 				url: link,
 				success: (data, status, jqxhr) ->
@@ -30,6 +44,7 @@ $.cowtech =
 			false
 
 		show_message: (ev, article) ->
+			# Prepare GUI for loading
 			lm = $.cowtech.messages.loading_message()
 			article = $(ev.target).closest('article') if ! article?
 
@@ -37,13 +52,13 @@ $.cowtech =
 			article.find('div.alert-error.ajax-after').remove()
 			article.before(lm)
 			article.hide()
-			console.info(article.hasClass('detailed'))
 
+			# Load the message
 			$.ajax({
-				url: $.cowtech.messages.data.paths['show'][0].replace('@@', aid),
+				url: $.cowtech.messages.data.paths['show'][0].replace('__', aid),
 				type: $.cowtech.messages.data.paths['show'][1],
 				data: {
-					details: !article.hasClass('detailed')
+					detailed: !article.hasClass('detailed')
 				},
 				success: (data, status, jqxhr) ->
 					message = $(data).attr('data-message-id', aid)
@@ -58,9 +73,11 @@ $.cowtech =
 
 			false;
 
+		# Just restore the previous message
 		cancel_message: (ev) ->
 			el = $(ev.target)
 			article = el.closest('article')
+			$.cowtech.creating = false
 
 			if article.find('form').hasClass('creating')
 				article.remove()
@@ -71,13 +88,14 @@ $.cowtech =
 			lm = $.cowtech.messages.loading_message()
 			lm.prependTo('#messages > section')
 
+			# Request the font
 			$.ajax({
 				url: $.cowtech.messages.data.paths['new'][0],
 				type: $.cowtech.messages.data.paths['new'][1],
 				success: (data, status, jqxhr) ->
 					lm.find('img').remove()
 					$('<div></div>').html(data).appendTo(lm).slideDown('fast')
-
+					$.cowtech.creating = true
 				error: (jqxhr, status, error) ->
 					lm.find('img').remove()
 					$('<div class="alert alert-block alert-error ajax">Unable to communicate with the server. Please try again later.</div>').appendTo(lm)
@@ -90,14 +108,19 @@ $.cowtech =
 			lm = $.cowtech.messages.loading_message()
 			lm.prependTo('#messages > section')
 
+			# Prepare GUI
 			aid = article.attr('data-message-id')
 			article.find('div.alert-error.ajax-after').remove()
 			article.before(lm)
 			article.hide()
 
+			# Fetch the form
 			$.ajax({
-				url: $.cowtech.messages.data.paths['edit'][0].replace('@@', aid),
+				url: $.cowtech.messages.data.paths['edit'][0].replace('__', aid),
 				type: $.cowtech.messages.data.paths['edit'][1],
+				data: {
+					detailed: article.hasClass('detailed')
+				},
 				success: (data, status, jqxhr) ->
 					lm.find('img').remove()
 					$('<div></div>').html(data).appendTo(lm)
@@ -112,50 +135,59 @@ $.cowtech =
 
 			false;
 
-		message_saved: (ev, data, status, xhr) ->
-			form = $(ev.target)
-
-			if $.cowtech.messages.data.params.action != 'index'
-				location.href = $.cowtech.messages.data.paths['root']
-			else if data.trim().length > 0
-				new_article = $(data)
-				form.closest('article').replaceWith(new_article)
-
-		message_error: (ev) ->
-			form = $(ev.target)
-			article = form.closest('article')
-
-			form.before($('<div class="alert alert-block alert-error">Unable to communicate with the server. Please try again later.</div>'))
-			form.find('message-action.submit').removeAttr('disabled').find('span').text('Submit')
-
 		delete_message: (ev) ->
+			# Prepare the GUI and get message info
 			article = $(ev.target).closest('article')
 			lm = $.cowtech.messages.loading_message()
 			lm.prependTo('#messages > section')
 
 			aid = article.attr('data-message-id')
-			console.log(aid)
 			article.find('div.alert-error.ajax-after').remove()
 			article.before(lm)
 			article.hide()
 
+			# Perform the deletion
 			$.ajax({
-				url: $.cowtech.messages.data.paths['delete'][0].replace('@@', aid),
+				url: $.cowtech.messages.data.paths['delete'][0].replace('__', aid),
 				type: $.cowtech.messages.data.paths['delete'][1],
 				success: (data, status, jqxhr) ->
 					article.remove()
 					lm.remove()
+					$.cowtech.messages.change_page(null, 0)
 				error: (jqxhr, status, error) ->
 					$('<div class="alert alert-block alert-error ajax-after">Unable to communicate with the server. Please try again later.</div>').appendTo(article)
 					article.show()
 					lm.remove()
 			});
 
+		message_saved: (ev, data, status, xhr) ->
+			form = $(ev.target)
+
+			# Just a callback, let's see if refresh the page
+			if $.cowtech.messages.data.params.action != 'index'
+				location.href = $.cowtech.messages.data.paths['root']
+			else if data.trim().length > 0
+				new_article = $(data)
+				form.closest('article').replaceWith(new_article)
+				$('#messages .no-message').remove()
+
+				if $.cowtech.creating == true
+					$.cowtech.messages.change_page(null, 1)
+
+		message_error: (ev) ->
+			# Triggered on AJAX callback for page changing
+			form = $(ev.target)
+			article = form.closest('article')
+
+			form.before($('<div class="alert alert-block alert-error">Unable to communicate with the server. Please try again later.</div>'))
+			form.find('message-action.submit').removeAttr('disabled').find('span').text('Submit')
+
 		validate_message: (ev) ->
 			form = $(ev.target)
 			article = form.closest('article')
 			valid = true;
 
+			# Every field is required.
 			article.find('div.alert-error').remove()
 			form.find('input, textarea').removeClass('error');
 			form.find('input, textarea').each(->
@@ -173,7 +205,8 @@ $.cowtech =
 			valid
 
 		autoload: ->
-			$('#new-message').on('click', $.cowtech.messages.create_message)
+			# All these are live event, to track AJAX changing.
+			$('body').on('click', '#new-message', $.cowtech.messages.create_message)
 
 			$('body').on('ajax:before', '#message-form', $.cowtech.messages.validate_message)
 			$('body').on('ajax:error', '#message-form', $.cowtech.messages.message_error)

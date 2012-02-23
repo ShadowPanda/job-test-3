@@ -8,17 +8,17 @@ class SemanticLinkRenderer < WillPaginate::ActionView::LinkRenderer
 	protected
 	def page_number(page)
 		if page != current_page then
-			tag(:li, link(page, page, :rel => rel_value(page)))
+			tag(:li, link(page, page, :rel => rel_value(page)), "data-page" => page)
 		else
-			tag(:li, link(page, "#"), :class => "active")
+			tag(:li, link(page, "#"), :class => "active", "data-page" => page)
 		end
 	end
 
 	def previous_or_next_page(page, text, classname)
 		if page then
-			tag(:li, link(text, page), :class => classname)
+			tag(:li, link(text, page), :class => classname, "data-page" => page)
 		else
-			tag(:li, link(text, "#"), :class => classname + " disabled")
+			tag(:li, link(text, "#"), :class => classname + " disabled", "data-page" => page)
 		end
 	end
 
