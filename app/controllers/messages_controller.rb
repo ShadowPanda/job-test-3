@@ -18,7 +18,7 @@ class MessagesController < ApplicationController
 	end
 
 	def can_edit?(record)
-		@current_user.present? && @current_user.try(:id) == record.try(:user_id)
+		@current_user.present? && (@record.new_record? || @current_user.try(:id) == record.try(:user_id))
 	end
 
 	def no_js
