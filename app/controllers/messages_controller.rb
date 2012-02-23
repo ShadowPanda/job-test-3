@@ -1,7 +1,6 @@
 # encoding: utf-8
 
 class MessagesController < ApplicationController
-	layout "application"
 	before_filter :setup
 
 	def setup
@@ -16,6 +15,10 @@ class MessagesController < ApplicationController
 			:update => [message_path("__"), "PUT"],
 			:delete => [message_path("__"), "DELETE"]
 		}
+	end
+
+	def can_edit?(record)
+		@current_user.present? && @current_user.try(:id) == record.try(:user_id)
 	end
 
 	def no_js
@@ -55,8 +58,13 @@ class MessagesController < ApplicationController
 	def edit
 		begin
 			@record = Message.find(params[:id]) if @record.blank?
+			raise SecurityError.new if !self.can_edit?(@record)
+
 			@creating = @record.new_record?
+
 			render "form.html", :layout => (request.xhr? ? false : "application")
+		rescue OAuth::Unauthorized.new() => o
+			render :text => o.to_s, :status => 403
 		rescue Exception => e
 			render :text => e.to_s, :status => 404
 		end
@@ -65,10 +73,15 @@ class MessagesController < ApplicationController
 	def update
 		begin
 			@record = Message.find(params[:id]) if @record.blank?
+			raise SecurityError.new if !self.can_edit?(@record)
+
 			@record.attributes = params[:message]
+			@record.user = @current_user
 			@record.save
 
 			self.show
+		rescue OAuth::Unauthorized => o
+			render :text => o.to_s, :status => 403
 		rescue Exception => e
 			render :text => e.to_s, :status => 500
 		end
@@ -77,8 +90,13 @@ class MessagesController < ApplicationController
 	def destroy
 		begin
 			@record = Message.find(params[:id]) if @record.blank?
+			raise SecurityError.new if !self.can_edit?(@record)
+
 			@record.delete
+
 			render :nothing => true, :status => 200
+		rescue OAuth::Unauthorized => o
+			render :text => o.to_s, :status => 403
 		rescue Exception => e
 			render :text => e.to_s, :status => 500
 		end

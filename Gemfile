@@ -14,6 +14,7 @@ gem "compass"
 gem "compass-rails"
 gem "compass_twitter_bootstrap"
 gem "will_paginate", "~> 3.0.2"
+gem "omniauth-twitter"
 
 group :development, :test do
 	gem "sqlite3-ruby", "~> 1.3.0", :require => "sqlite3"

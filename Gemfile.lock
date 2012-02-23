@@ -54,6 +54,7 @@ GEM
       multi_json (~> 1.0)
     fssm (0.2.8.1)
     git (1.2.5)
+    hashie (1.2.0)
     hike (1.2.1)
     i18n (0.6.0)
     jeweler (1.8.3)
@@ -74,6 +75,15 @@ GEM
       treetop (~> 1.4.8)
     mime-types (1.17.2)
     multi_json (1.1.0)
+    oauth (0.4.5)
+    omniauth (1.0.2)
+      hashie (~> 1.2)
+      rack
+    omniauth-oauth (1.0.0)
+      oauth
+      omniauth (~> 1.0)
+    omniauth-twitter (0.0.8)
+      omniauth-oauth (~> 1.0)
     pg (0.13.2)
     polyglot (0.3.3)
     rack (1.4.1)
@@ -137,6 +147,7 @@ DEPENDENCIES
   cowtech-extensions
   jquery-rails
   kramdown
+  omniauth-twitter
   pg
   rails (= 3.2.0)
   sass-rails

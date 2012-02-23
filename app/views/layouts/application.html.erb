@@ -6,6 +6,7 @@
 	   <%= yield :additional_stylesheets %>
 
 	   <%= javascript_include_tag "application" %>
+	   <%= javascript_include_tag "twitter-bootstrap-dropdown-2.0.1" %>
 	   <%= javascript_include_tag params[:controller] %>
 	   <script type="text/javascript">
        $.cowtech.messages.data.params = <%= params.to_json.html_safe %>;
@@ -28,6 +29,18 @@
 					<%= link_to "Cowtech Job Test 3", :root, :class => "brand" %>
 					
 					<ul class="nav pull-right">
+						<% if @current_user.present? then %>
+							<li class="dropdown profile">
+							   <%= link_to("#", :class => "dropdown-toggle", "data-toggle" => "dropdown") do %>Welcome back <b><%= @current_user.name %></b> (<b>@<%= @current_user.nick %></b>)! <b class="caret"></b><% end %>
+
+								<ul class="dropdown-menu">
+									<li><%= link_to("View your profile on Twitter", @current_user.profile_url, {:target => :blank}) %></li>
+									<li class="divider"></li>
+									<li><%= link_to("Logout", {:controller => :authenticate, :action => :logout}) %></li>
+								</ul>
+						<% else %>
+							<li class="signin"><%= link_to(image_tag("twitter-signin.png", :alt => "Sign in with Twitter"), "/auth/twitter") %></li>
+						<% end %>
 						<!--<li><a href="http://github.com/ShogunPanda/job-test3">Fork on GitHub</a></li>-->
 					</ul>
 				</div>

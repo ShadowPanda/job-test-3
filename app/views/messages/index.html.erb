@@ -4,9 +4,13 @@
 	<header class="container-fluid">
 		<div class="row-fluid">
 			<div class="span4">
-				<%= link_to("#", {:id => "new-message"}) do %>
-					<i class="icon-white icon-plus"></i>
-					New post
+				<% if @current_user.present? then %>
+					<%= link_to("#", {:id => "new-message"}) do %>
+						<i class="icon-white icon-plus"></i>
+						New post
+					<% end %>
+				<% else %>
+			      &nbsp;
 				<% end %>
 			</div>
 			<div class="span4 counter">
