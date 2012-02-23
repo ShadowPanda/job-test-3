@@ -31,7 +31,7 @@
 					<ul class="nav pull-right">
 						<% if @current_user.present? then %>
 							<li class="dropdown profile">
-							   <%= link_to("#", :class => "dropdown-toggle", "data-toggle" => "dropdown") do %>Welcome back <b><%= @current_user.name %></b> (<b>@<%= @current_user.nick %></b>)! <b class="caret"></b><% end %>
+							   <%= link_to("#", :class => "dropdown-toggle", "data-toggle" => "dropdown") do %>Welcome back, <b><%= @current_user.name %></b> (<b>@<%= @current_user.nick %></b>)! <b class="caret"></b><% end %>
 
 								<ul class="dropdown-menu">
 									<li><%= link_to("View your profile on Twitter", @current_user.profile_url, {:target => :blank}) %></li>
