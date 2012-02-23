@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Cowtech Job Test 3</title>
+		<%= stylesheet_link_tag "application" %>
+	   <%= yield :additional_stylesheets %>
+
+	   <%= javascript_include_tag "application" %>
+	   <%= javascript_include_tag params[:controller] %>
+	   <script type="text/javascript">
+       $.cowtech.messages.data.params = <%= params.to_json.html_safe %>;
+       $.cowtech.messages.data.paths = <%= @paths.to_json.html_safe %>;
+      </script>
+		<%= yield :additional_javascripts %>
+
+		<%= csrf_meta_tags %>
+
+	   <% if params[:action] != "no_js" then %>
+		<noscript>
+			<meta http-equiv="refresh" content="0;url=<%= url_for({:controller => :messages, :action => "no-js"}) %>"/>
+		</noscript>
+		<% end %>
+	</head>
+	<body>
+		<header class="navbar navbar-static">
+			<div class="navbar-inner">
+				<div class="container">
+					<%= link_to "Cowtech Job Test 3", :root, :class => "brand" %>
+					
+					<ul class="nav pull-right">
+						<!--<li><a href="http://github.com/ShogunPanda/job-test3">Fork on GitHub</a></li>-->
+					</ul>
+				</div>
+			</div>
+		</header>
+
+		<div class="container">
+			<section id="body">
+				<%= yield %>
+			</section>
+
+			<hr/>
+			
+			<footer>
+				<p>© 2012 and above <a href="http://cowtech.it">Paolo Insogna</a>, released under the <a href="http://www.opensource.org/licenses/mit-license.php">MIT License</a>.</p>
+			</footer>						
+		</div>		
+	</body>
+</html>

@@ -1,0 +1,23 @@
+<article id="message-<%= record.id %>" class="<%= request.xhr? ? "xhr" : "" %> <%= details ? "detailed" : "" %>" data-message-id="<%= record.id %>">
+	<header class="container-fluid">
+		<div class="row-fluid">
+			<div class="span10">
+			   <%= content_tag(details ? :h3 : :h4) do %><i class="icon-edit"></i> <%= record.title %><% end %>
+			 	<h5>Posted on <%= record.created_at.strftime("%B %d, %Y @ %H:%M") %> by <b><%= record.user %></b><% if record.created_at != record.updated_at then %>, last update on <%= record.updated_at.strftime("%B %d, %Y @ %H:%M") %><% end %></h5>
+			</div>
+			<div class="span2 align-right buttons">
+			   <button class="btn btn-secondary message-action detail"><i class="icon-<%= details ? "minus" : "plus" %>"></i></button>
+			   <button class="btn btn-secondary message-action edit"><i class="icon-edit"></i></button>
+			   <button class="btn btn-danger message-action delete"><i class="icon-remove icon-white remove"></i></button>
+			</div>
+		</div>
+	</header>
+
+	<% if details then %>
+	<hr/>
+
+	<section class="body">
+		<%= Kramdown::Document.new(record.content).to_html.html_safe %>
+	</section>
+	<% end %>
+</article>

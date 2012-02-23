@@ -1,0 +1,5 @@
+/.bundle
+/db/*.db
+/log/*.log
+/tmp
+/.idea

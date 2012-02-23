@@ -1,0 +1,43 @@
+<%= content_tag(request.xhr? ? :h3 : :h1, "#{@creating ? "Submit" : "Editing"} a posting") %>
+
+<hr/>
+
+<%= form_for @record, :html => {:id => "message-form", :class => "editing #{@creating ? "creating" : ""} #{request.xhr? ? "xhr" : ""}"}, :remote => true do |f| %>
+	<div class="container-fluid">
+		<div class="row-fluid">
+			<div class="span4">
+				<div class="control-group">
+					<%= f.label :title, "Title:" %>
+					<div class="controls">
+						<%= f.text_field :title %>
+					</div>
+				</div>
+
+			   <div class="control-group">
+					<%= f.label :user, "User:" %>
+					<div class="controls">
+						<%= f.text_field :user %>
+					</div>
+				</div>
+			</div>
+
+			<div class="span8">
+			   <div class="control-group">
+					<%= f.label :content, "Message:" %>
+
+					<div class="controls">
+						<%= f.text_area :content %>
+						<span class="hint help-block unset">You can use <%= link_to "Markdown", "http://daringfireball.net/projects/markdown/syntax" %>.</span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="form-actions align-right">
+		<% if !@creating then %><button type="submit" class="btn btn-danger message-action delete"><i class="icon-remove icon-white"></i> Delete</button><% end %>
+	   <% if request.xhr? then %><button type="reset" class="btn btn-secondary message-action cancel"><i class="icon-off"></i> Cancel</button><% end %>
+		<button type="submit" class="btn btn-primary"><i class="icon-ok icon-white message-action submit"></i> <span>Submit</span></button>
+	</div>
+<% end %>
+

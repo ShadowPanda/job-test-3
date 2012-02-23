@@ -1,0 +1,27 @@
+<% if !request.xhr? then %><h1>Message board</h1><% end %>
+
+<section id="messages">
+	<header class="container-fluid">
+		<div class="row-fluid">
+			<div class="span6">
+				<%= link_to("#", {:id => "new-message"}) do %>
+					<i class="icon-white icon-plus"></i>
+					New post
+				<% end %>
+			</div>
+			<div class="span6">
+			   <% if @records.total_pages > 1 then %>
+	         <div class="pagination pagination-right">
+	            <%= will_paginate(@records, {:class => "ul", :page_links => true, :previous_label => "&larr;", :next_label => "&rarr;", :renderer => SemanticLinkRenderer }) %>
+	         </div>
+				<% end %>
+			</div>
+		</div>
+	</header>
+
+	<section>
+		<% @records.each do |record| %>
+			<%= render :partial => "message.html", :locals => {:record => record, :details => false} %>
+		<% end %>
+	</section>
+</section>

@@ -1,0 +1,193 @@
+String.prototype.trim = -> this.replace /(^\s+)|(\s+$)/g, ''
+
+$.cowtech =
+	messages:
+		data: {}
+
+		loading_message: ->
+			message = $('<article class="editing xhr"></article>')
+			loader = $('<%= image_tag "loader.gif", {:alt => "Loading ...", :class => "loader"} %>').appendTo(message)
+			message
+
+		change_page: ->
+			lm = $.cowtech.messages.loading_message()
+			link = $(this).attr('href')
+
+			messages = $('#messages').hide()
+			messages.parent().find('> div.alert-error.ajax-after').remove()
+			messages.before(lm)
+
+			$.ajax({
+				url: link,
+				success: (data, status, jqxhr) ->
+					messages.replaceWith($(data))
+					lm.remove()
+				error: (jqxhr, status, error) ->
+					lm.replaceWith($('<div class="alert alert-block alert-error ajax-after">Unable to communicate with the server. Please try again later.</div>'))
+					messages.show()
+			});
+
+			false
+
+		show_message: (ev, article) ->
+			lm = $.cowtech.messages.loading_message()
+			article = $(ev.target).closest('article') if ! article?
+
+			aid = article.attr('data-message-id')
+			article.find('div.alert-error.ajax-after').remove()
+			article.before(lm)
+			article.hide()
+			console.info(article.hasClass('detailed'))
+
+			$.ajax({
+				url: $.cowtech.messages.data.paths['show'][0].replace('@@', aid),
+				type: $.cowtech.messages.data.paths['show'][1],
+				data: {
+					details: !article.hasClass('detailed')
+				},
+				success: (data, status, jqxhr) ->
+					message = $(data).attr('data-message-id', aid)
+					lm.replaceWith(message)
+					article.remove()
+				error: (jqxhr, status, error) ->
+					lm.find('.loader').remove()
+					$('<div class="alert alert-block alert-error ajax-after">Unable to communicate with the server. Please try again later.</div>').appendTo(article)
+					article.show()
+					lm.remove()
+			});
+
+			false;
+
+		cancel_message: (ev) ->
+			el = $(ev.target)
+			article = el.closest('article')
+
+			if article.find('form').hasClass('creating')
+				article.remove()
+			else
+				$.cowtech.messages.show_message(null, article)
+
+		create_message: ->
+			lm = $.cowtech.messages.loading_message()
+			lm.prependTo('#messages > section')
+
+			$.ajax({
+				url: $.cowtech.messages.data.paths['new'][0],
+				type: $.cowtech.messages.data.paths['new'][1],
+				success: (data, status, jqxhr) ->
+					lm.find('img').remove()
+					$('<div></div>').html(data).appendTo(lm).slideDown('fast')
+
+				error: (jqxhr, status, error) ->
+					lm.find('img').remove()
+					$('<div class="alert alert-block alert-error ajax">Unable to communicate with the server. Please try again later.</div>').appendTo(lm)
+			});
+
+			false;
+
+		edit_message: (ev) ->
+			article = $(ev.target).closest('article')
+			lm = $.cowtech.messages.loading_message()
+			lm.prependTo('#messages > section')
+
+			aid = article.attr('data-message-id')
+			article.find('div.alert-error.ajax-after').remove()
+			article.before(lm)
+			article.hide()
+
+			$.ajax({
+				url: $.cowtech.messages.data.paths['edit'][0].replace('@@', aid),
+				type: $.cowtech.messages.data.paths['edit'][1],
+				success: (data, status, jqxhr) ->
+					lm.find('img').remove()
+					$('<div></div>').html(data).appendTo(lm)
+					lm.attr('data-message-id', aid)
+					lm.addClass('detailed') if !article.hasClass('detailed')
+					article.remove()
+				error: (jqxhr, status, error) ->
+					$('<div class="alert alert-block alert-error ajax-after">Unable to communicate with the server. Please try again later.</div>').appendTo(article)
+					article.show()
+					lm.remove()
+			});
+
+			false;
+
+		message_saved: (ev, data, status, xhr) ->
+			form = $(ev.target)
+
+			if $.cowtech.messages.data.params.action != 'index'
+				location.href = $.cowtech.messages.data.paths['root']
+			else if data.trim().length > 0
+				new_article = $(data)
+				form.closest('article').replaceWith(new_article)
+
+		message_error: (ev) ->
+			form = $(ev.target)
+			article = form.closest('article')
+
+			form.before($('<div class="alert alert-block alert-error">Unable to communicate with the server. Please try again later.</div>'))
+			form.find('message-action.submit').removeAttr('disabled').find('span').text('Submit')
+
+		delete_message: (ev) ->
+			article = $(ev.target).closest('article')
+			lm = $.cowtech.messages.loading_message()
+			lm.prependTo('#messages > section')
+
+			aid = article.attr('data-message-id')
+			console.log(aid)
+			article.find('div.alert-error.ajax-after').remove()
+			article.before(lm)
+			article.hide()
+
+			$.ajax({
+				url: $.cowtech.messages.data.paths['delete'][0].replace('@@', aid),
+				type: $.cowtech.messages.data.paths['delete'][1],
+				success: (data, status, jqxhr) ->
+					article.remove()
+					lm.remove()
+				error: (jqxhr, status, error) ->
+					$('<div class="alert alert-block alert-error ajax-after">Unable to communicate with the server. Please try again later.</div>').appendTo(article)
+					article.show()
+					lm.remove()
+			});
+
+		validate_message: (ev) ->
+			form = $(ev.target)
+			article = form.closest('article')
+			valid = true;
+
+			article.find('div.alert-error').remove()
+			form.find('input, textarea').removeClass('error');
+			form.find('input, textarea').each(->
+				if $(this).val().trim().length == 0
+					valid = false
+					$(this).addClass('error')
+				true
+			)
+
+			if ! valid
+				form.before($('<div class="alert alert-block alert-error">Please fill all fields marked in red.</div>'))
+			else
+				form.find('message-action.submit').attr('disabled', 'disabled').find('span').text('Submitting ...')
+
+			valid
+
+		autoload: ->
+			$('#new-message').on('click', $.cowtech.messages.create_message)
+
+			$('body').on('ajax:before', '#message-form', $.cowtech.messages.validate_message)
+			$('body').on('ajax:error', '#message-form', $.cowtech.messages.message_error)
+			$('body').on('ajax:success', '#message-form', $.cowtech.messages.message_saved)
+
+			$('body').on('click', 'div.pagination li:not(.disabled):not(.active) a', $.cowtech.messages.change_page)
+			$('body').on('click', '.message-action.detail', $.cowtech.messages.show_message)
+			$('body').on('click', '.message-action.edit', $.cowtech.messages.edit_message)
+			$('body').on('click', '.message-action.cancel', $.cowtech.messages.cancel_message)
+			$('body').on('click', '.message-action.delete', $.cowtech.messages.delete_message)
+
+			true
+
+jQuery(document).ready(($) ->
+	$.cowtech.messages.autoload()
+	true
+)

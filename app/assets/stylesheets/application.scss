@@ -1,0 +1,138 @@
+@charset "utf-8";
+
+@import "compass";
+@import "compass_twitter_bootstrap";
+
+h1, h2{
+	margin-bottom: 18px;
+}
+
+.align-right{
+	text-align: right;
+}
+
+#messages{
+	& > header{
+		@include border-radius(4px);
+		background-color: #4E4E4E;
+		padding: 5px;
+	}
+
+	#new-message{
+		display: inline-block;
+		@include border-radius(4px);
+		background-color: #9D9D9D;
+		margin: 5px;
+		padding: 5px;
+		color: white;
+
+		&:hover{
+			background-color: #FCB734;
+			@include transition-property(background-color);
+			@include transition-duration(0.2s);
+			@include transition-timing-function(ease);
+		}
+	}
+}
+
+article{
+	hr{
+		border-top-color: #DDDDDD;
+	}
+
+	@include border-radius(4px);
+	background-color: #F2F2F2;
+	margin: 10px 0px;
+
+	padding: 10px;
+
+	img.loader{
+		display: block;
+		margin: 5px auto;
+	}
+
+	.buttons{
+		@include nowrap;
+	}
+
+	header.container-fluid{
+		padding: 0;
+	}
+
+	h3{
+		i{
+			margin-top: 4px;
+		}
+	}
+
+	h4{
+		i{
+			margin-top: 1px;
+		}
+	}
+
+	h5{
+		font-weight: normal;
+		color: #9E9E9E;
+	}
+
+	form{
+		margin-bottom: 0;
+
+		.form-actions{
+			margin-bottom: 0;
+		}
+	}
+}
+
+.editing{
+	textarea{
+		width: 100%;
+		height: 90px;
+	}
+
+	input, textarea{
+		&.error{
+			border-color: #DD0000;
+		}
+	}
+
+	&.xhr{
+		.form-actions{
+			background-color: transparent;
+			padding-right: 12px;
+		}
+	}
+}
+
+.alert-error.ajax{
+	margin-bottom: 0;
+}
+
+.alert-error.ajax-after{
+	margin-top: 18px;
+}
+
+.unset{
+	color: #9E9E9E;
+}
+
+.pagination{
+   margin: 0;
+
+	a{
+		background-color: #EEEEEE !important;
+
+		&.active{
+			background-color: #DDDDDD  !important;
+		}
+
+		&:hover{
+		   cursor: pointer;
+			background-color: #FCB734 !important;
+			@include transition-property(background-color);
+			@include transition-duration(0.2s);
+			@include transition-timing-function(ease);
+		}
+	}
+}
