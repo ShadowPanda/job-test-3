@@ -13,10 +13,9 @@ class AuthenticateController < ApplicationController
 	end
 
 	def callback
-		authdata = request.env['omniauth.auth']
-		raise authdata.to_yaml
+		if request.env.has_key?("omniauth.auth") then
+			authdata = request.env["omniauth.auth"]
 
-		if authdata.present? then
 			attributes = {
 				:persistence_token => Digest::SHA256.hexdigest(params[:oauth_token] + Time.now.to_i.to_s),
 				:nick => authdata[:info][:nickname],
@@ -24,12 +23,8 @@ class AuthenticateController < ApplicationController
 			}
 
 			# Find the existing user
-			user = nil
-			begin
-				user = User.find_by_nick(attributes[:nick])
-			rescue
-				user = User.new
-			end
+			user = User.find_by_nick(attributes[:nick])
+			user = User.new if user.nil?
 
 			begin
 				user.attributes = attributes
