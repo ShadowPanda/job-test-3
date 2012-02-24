@@ -34,6 +34,7 @@ class AuthenticateController < ApplicationController
 				user.attributes = attributes
 				user.save
 			rescue Exception => e
+				raise e
 			end
 
 			cookies[:upt] = {:value => attributes[:persistence_token], :expires => 1.hour.from_now, :path => "/"}
