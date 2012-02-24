@@ -14,6 +14,7 @@ class AuthenticateController < ApplicationController
 
 	def callback
 		authdata = request.env['omniauth.auth']
+		raise authdata.to_yaml
 
 		if authdata.present? then
 			attributes = {
